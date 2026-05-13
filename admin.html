@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Misha Family Salon </title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- Firebase -->
+ <link rel="stylesheet" href="admin.css">
+ <link rel="icon" src="images/logo.webp">
+</head>
+<body>
+
+<!-- ══ SECURE LOGIN ══ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <img src="images/logo.webp" width="50px" height="50px">
+    <div class="login-logo">Misha Family Salon & Academy</div>
+    <div class="login-sub">Admin Panel — Secure Access</div>
+    <div class="secure-badge">🔐 Secured with Firebase Authentication</div>
+    <label class="login-lbl">Email Address</label>
+    <div class="login-iw">
+      <input type="email" id="emailInput" placeholder="Enter your email" onkeydown="if(event.key==='Enter')trySecureLogin()">
+    </div>
+    <label class="login-lbl">Password</label>
+    <div class="login-iw">
+      <input type="password" id="passwordInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')trySecureLogin()">
+      <button class="eye-btn" onclick="togglePasswordVisibility()">👁</button>
+    </div>
+    <div class="login-att" id="attTxt"></div>
+    <button class="login-btn" id="loginBtn" onclick="trySecureLogin()">Login Securely</button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <button class="admin-hamburger" id="adminHamburger" onclick="toggleAdminSidebar()">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar()"></div>
+  <div class="sidebar" id="adminSidebar">
+    <div class="sb-brand">
+      <div><img src="images/logo.webp" width="50px" height="50px"></div>
+      <div class="b1">Misha Family Salon</div>
+      <div class="b2">Admin Panel</div>
+      <div class="sb-badge">✅ Secured</div>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-section">Overview</div>
+      <button class="sb-btn on" id="sb-dashboard" onclick="showPanel('dashboard',this)"><span class="icon">📊</span>Dashboard</button>
+      <div class="sb-section">Appointments</div>
+      <button class="sb-btn" id="sb-appointments" onclick="showPanel('appointments',this)"><span class="icon">📅</span>All Appointments</button>
+      <div class="sb-section">Manage Content</div>
+      <button class="sb-btn" id="sb-services" onclick="showPanel('services',this)"><span class="icon">✂️</span>Services & Prices</button>
+      <button class="sb-btn" id="sb-offers" onclick="showPanel('offers',this)"><span class="icon">🏷️</span>Offers & Promotions</button>
+      <button class="sb-btn" id="sb-gallery" onclick="showPanel('gallery',this)"><span class="icon">🖼️</span>Gallery Manager</button>
+      <button class="sb-btn" id="sb-stylists" onclick="showPanel('stylists',this)"><span class="icon">💇</span>Stylists</button>
+    </div>
+    <div class="sb-footer">
+      <button class="btn btn-outline" id="darkModeBtn" onclick="toggleDarkMode()">🌙 Dark Mode </button>
+      <br>
+      <button class="logout-btn" onclick="doLogout()">🔒 Log Out</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- DASHBOARD -->
+    <div id="p-dashboard" class="panel on">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Overview</div>
+        <div class="panel-title">Dashboard</div>
+        <div class="panel-sub">Welcome back! Logged in securely.</div>
+      </div>
+      <div class="stats-row" id="dashStats"></div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Recent Appointments</span>
+          <button class="btn btn-outline btn-sm" onclick="showPanel('appointments')">View All</button>
+        </div>
+        <div id="dashRecent"></div>
+        <div class="dashboard-side-grid">
+          <div class="card">
+            <div class="card-header">
+               <div class="card-title">
+                Today's Appointments
+              </div>
+            </div>
+
+            <div id="todayAppointments"></div>
+
+         </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              Pending Approvals
+            </div>
+          </div>
+
+        <div id="pendingAppointments"></div>
+
+      </div>
+
+    </div>
+      </div>
+    </div>
+
+    <!-- APPOINTMENTS -->
+    <div id="p-appointments" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Bookings</div>
+        <div class="panel-title">All Appointments</div>
+        <div class="panel-sub">View, filter and manage all client bookings.</div>
+      </div>
+      <div class="card">
+        <div class="ctrl-row">
+          <select id="fltStatus" onchange="renderAppts()">
+            <option value="">All Statuses</option>
+            <option>Pending</option><option>Confirmed</option><option>Done</option><option>Cancelled</option>
+          </select>
+          <input type="text" id="srchClient" placeholder="Search name or phone…" oninput="renderAppts()" style="min-width:180px;">
+          <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="exportCSV()">Export CSV ↓</button>
+        </div>
+        <div class="ctrl-row">
+          <label>
+            <input type="checkbox" id="selectAllAppointments">
+            Select All
+          </label>
+          <button class="btn btn-red"
+          onclick="deleteSelectedAppointments()">
+          Delete
+        </button>
+          </div>
+        <div class="table-wrap" id="apptTable"></div>
+      </div>
+    </div>
+
+    <!-- SERVICES -->
+    <div id="p-services" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Content Management</div>
+        <div class="panel-title">Services & Prices</div>
+        <div class="panel-sub">Add, edit, update prices, or remove services.</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">All Services</span>
+          <button class="btn btn-brown btn-sm" onclick="openSrvModal()">+ Add Service</button>
+        </div>
+        <div id="srvAdminList"></div>
+      </div>
+    </div>
+
+    <!-- OFFERS -->
+    <div id="p-offers" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Content Management</div>
+        <div class="panel-title">Offers & Promotions</div>
+        <div class="panel-sub">Create, edit and remove special offers.</div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+        <button class="btn btn-brown" onclick="openOfferModal()">+ Add Offer</button>
+      </div>
+      <div id="offerAdminList"></div>
+    </div>
+
+    <!-- GALLERY -->
+    <div id="p-gallery" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Content Management</div>
+        <div class="panel-title">Gallery Manager</div>
+        <div class="panel-sub">Add or remove photos from the gallery.</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Gallery Items</span>
+          <button class="btn btn-brown btn-sm" onclick="openGalModal()">+ Add Photo Slot</button>
+        </div>
+        <div id="galMgrGrid"></div>
+      </div>
+    </div>
+
+    <!-- STYLISTS -->
+    <div id="p-stylists" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Content Management</div>
+        <div class="panel-title">Stylists</div>
+        <div class="panel-sub">Add or remove stylists. They will appear as options during customer booking.</div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
+        <button class="btn btn-brown" onclick="openStylistModal()">+ Add Stylist</button>
+      </div>
+      <div id="stylistAdminList"></div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ══ SERVICE MODAL ══ -->
+<div class="overlay" id="srvOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="srvModalTitle">Add Service</h3>
+      <button class="modal-close" onclick="closeSrvModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="srvEditId">
+      <div class="fg"><label>Service Name *</label><input type="text" id="srvName" placeholder="e.g. Hair Cut (Ladies)"></div>
+      <div class="fg"><label>Category *</label>
+        <select id="srvCat">
+          <option value="Hair">Hair</option>
+          <option value="Makeup & Bridal">Makeup & Bridal</option>
+          <option value="Skin & Face">Skin & Face</option>
+          <option value="Nails">Nails</option>
+        </select>
+      </div>
+      <div class="fg"><label>Description</label><textarea id="srvDesc" placeholder="Brief description…"></textarea></div>
+      <div class="fr">
+        <div class="fg"><label>Price (₹) *</label><input type="number" id="srvPrice" placeholder="500"></div>
+        <div class="fg"><label>Duration</label><input type="text" id="srvDur" placeholder="45 min"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeSrvModal()">Cancel</button>
+      <button class="btn btn-brown" onclick="saveSrv()">Save Service</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ OFFER MODAL ══ -->
+<div class="overlay" id="offerOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="offerModalTitle">Add Offer</h3>
+      <button class="modal-close" onclick="closeOfferModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="offerEditId">
+      <div class="fg"><label>Offer Name *</label><input type="text" id="offerName" placeholder="e.g. Bridal Bliss Package"></div>
+      <div class="fg"><label>Description</label><textarea id="offerDesc" placeholder="What's included…"></textarea></div>
+      <div class="fr">
+        <div class="fg"><label>Original Price (₹)</label><input type="number" id="offerOrig" placeholder="5000"></div>
+        <div class="fg"><label>Offer Price (₹) *</label><input type="number" id="offerPrice" placeholder="3500"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeOfferModal()">Cancel</button>
+      <button class="btn btn-brown" onclick="saveOffer()">Save Offer</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GALLERY MODAL ══ -->
+<div class="overlay" id="galOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Add Gallery Photo</h3>
+      <button class="modal-close" onclick="closeGalModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label>Label / Caption *</label><input type="text" id="galLabel" placeholder="e.g. Bridal Makeup"></div>
+      <div class="fg"><label>Category *</label>
+        <select id="galCat">
+          <option value="hair">Hair</option>
+          <option value="bridal">Bridal & Makeup</option>
+          <option value="skin">Skin & Spa</option>
+          <option value="nails">Nails</option>
+          <option value="shop">Our Salon</option>
+        </select>
+      </div>
+      <div class="fg"><label>Image URL (optional)</label><input type="text" id="galUrl" placeholder="https://your-image-url.jpg"></div>
+      <div class="fg" style="flex-direction:row;align-items:center;gap:0.8rem;">
+        <label class="switch" style="flex-shrink:0;">
+          <input type="checkbox" id="galPreview" checked>
+          <span class="slider"></span>
+        </label>
+        <div>
+          <div style="font-size:0.78rem;color:var(--dark);font-weight:500;">Show in Homepage Preview</div>
+          <div style="font-size:0.68rem;color:var(--taupe);margin-top:2px;">Display this image in the homepage gallery highlights</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeGalModal()">Cancel</button>
+      <button class="btn btn-brown" onclick="saveGalItem()">Add to Gallery</button>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS MODAL -->
+<div class="overlay" id="statusOverlay">
+  <div class="modal" style="width:360px;">
+    <div class="modal-head">
+      <h3>Update Status</h3>
+      <button class="modal-close" onclick="closeStatusModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="statusEditId">
+      <div class="fg"><label>New Status</label>
+        <select id="statusSelect" onchange="toggleWaPreview()">
+          <option>Pending</option><option>Confirmed</option><option>Done</option><option>Cancelled</option>
+        </select>
+      </div>
+      <!-- WhatsApp confirmation preview — shown only when Confirmed is selected -->
+      <div id="waConfirmBox" style="display:none;margin-top:0.8rem;background:#e8f5e9;border:1px solid rgba(45,122,74,0.25);padding:1rem;border-radius:3px;">
+        <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:#2d7a4a;margin-bottom:0.5rem;">📲 WhatsApp Confirmation</div>
+        <div id="waPreviewText" style="font-size:0.78rem;color:#2E1A0E;line-height:1.6;white-space:pre-wrap;"></div>
+        <div style="margin-top:0.8rem;font-size:0.68rem;color:#2d7a4a;">Clicking "Confirm & Send WhatsApp" will open WhatsApp with this message pre-filled.</div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeStatusModal()">Cancel</button>
+      <button class="btn btn-brown" onclick="saveStatus(false)">Update Only</button>
+      <button class="btn btn-green" id="waSendBtn" style="display:none;" onclick="saveStatus(true)">✅ Confirm & Send WhatsApp</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STYLIST MODAL ══ -->
+<div class="overlay" id="stylistOverlay">
+  <div class="modal" style="width:400px;">
+    <div class="modal-head">
+      <h3 id="stylistModalTitle">Add Stylist</h3>
+      <button class="modal-close" onclick="closeStylistModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="stylistEditId">
+      <div class="fg"><label>Full Name *</label><input type="text" id="stylistName" placeholder="e.g. Priya Sharma"></div>
+      <div class="fg"><label>Specialisation</label><input type="text" id="stylistSpec" placeholder="e.g. Hair Colour, Bridal"></div>
+      <div class="fg"><label>Experience</label><input type="text" id="stylistExp" placeholder="e.g. 5 years"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeStylistModal()">Cancel</button>
+      <button class="btn btn-brown" onclick="saveStylist()">Save Stylist</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script type="module" src="admin.js"></script>
+</body>
+</html>
