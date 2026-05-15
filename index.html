@@ -151,7 +151,7 @@
             </div>
             <div class="ii"><span class="ii-icon">🕐</span>
                 <div>
-                    <div class="ii-label">Hours</div>
+                    <div class="ii-label">Hours <span id="liveStatusBadge" class="live-status-badge"></span></div>
                     <div class="ii-val">Everyday <br>8 AM – 9 PM</div>
                 </div>
             </div>
@@ -166,6 +166,16 @@
                     <div class="ii-label">Landmark</div>
                     <div class="ii-val">Near HDFC Bank<br>Raja Garden, Kottivakkam</div>
                 </div>
+            </div>
+        </div>
+        
+        
+        <!-- OFFERS -->
+        <div class="offers-section">
+            <div class="offers-inner">
+                <div class="sec-label" style="color:var(--taupe);">Special Offers</div>
+                <h2 class="sec-title serif" style="color:rgba(255,255,255,0.85);">Current promotions</h2>
+                <div class="offers-grid" id="offersGrid"><p style="color:rgba(255,255,255,0.3);font-size:0.85rem;grid-column:span 3;text-align:center;padding:2rem;">Loading offers…</p></div>
             </div>
         </div>
 
@@ -199,6 +209,62 @@
             </div>
         </div>
 
+        <!-- TESTIMONIALS SECTION -->
+        <div class="testimonials-section">
+            <div class="section" style="padding-top:0;padding-bottom:0;">
+                <div class="sec-label">What our clients say</div>
+                <h2 class="sec-title serif">Client testimonials</h2>
+                <p class="sec-sub">Real reviews from our happy clients — your trust means everything to us.</p>
+                <div class="divider"></div>
+                <div class="testimonials-grid" id="testimonialsGrid">
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <p class="testimonial-text">"Absolutely loved my bridal makeup! The team made me feel so special on my big day. Every detail was perfect."</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">P</div>
+                            <div>
+                                <div class="testimonial-name">Priya Ramesh</div>
+                                <div class="testimonial-service">Bridal Makeup</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <p class="testimonial-text">"Best hair colour I've ever had! The stylist understood exactly what I wanted. Will definitely come back."</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">S</div>
+                            <div>
+                                <div class="testimonial-name">Sneha Krishnan</div>
+                                <div class="testimonial-service">Hair Colouring</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <p class="testimonial-text">"My go-to salon for the whole family. Great service, fair pricing, and the kids love coming here too!"</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">A</div>
+                            <div>
+                                <div class="testimonial-name">Arun Kumar</div>
+                                <div class="testimonial-service">Hair Cut (Gents)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">★★★★★</div>
+                        <p class="testimonial-text">"The gold facial was heavenly! My skin was glowing for days. Such a relaxing and professional experience."</p>
+                        <div class="testimonial-author">
+                            <div class="testimonial-avatar">D</div>
+                            <div>
+                                <div class="testimonial-name">Deepa Venkat</div>
+                                <div class="testimonial-service">Gold Facial</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- LIGHTBOX POPUP -->
         <div class="lightbox-overlay" id="lightboxOverlay" onclick="closeLightbox(event)">
             <button class="lightbox-close" onclick="closeLightbox(event)" aria-label="Close">×</button>
@@ -211,14 +277,6 @@
             <div class="lightbox-counter" id="lightboxCounter"></div>
         </div>
 
-        <!-- OFFERS -->
-        <div class="offers-section">
-            <div class="offers-inner">
-                <div class="sec-label" style="color:var(--taupe);">Special Offers</div>
-                <h2 class="sec-title serif" style="color:rgba(255,255,255,0.85);">Current promotions</h2>
-                <div class="offers-grid" id="offersGrid"><p style="color:rgba(255,255,255,0.3);font-size:0.85rem;grid-column:span 3;text-align:center;padding:2rem;">Loading offers…</p></div>
-            </div>
-        </div>
 
         <!-- MAP -->
         <div style="padding:6rem 0;background:var(--pale);">
@@ -329,6 +387,7 @@
                 <button class="gtab" onclick="filterGal('bridal',this)">Bridal & Makeup</button>
                 <button class="gtab" onclick="filterGal('skin',this)">Skin & Spa</button>
                 <button class="gtab" onclick="filterGal('nails',this)">Nails</button>
+                <button class="gtab" onclick="filterGal('beforeafter',this)">✨ Before & After</button>
                 <button class="gtab" onclick="filterGal('shop',this)">Our Salon</button>
             </div>
             <div class="gallery-full-grid" id="galGrid"></div>
@@ -422,6 +481,7 @@
                             <div id="stylistSlotMsg" style="font-size:0.72rem;color:#a33;margin-top:0.3rem;display:none;"></div>
                         </div>
                         <div class="fg"><label>Special Requests / Notes</label><textarea id="b_nt" placeholder="Allergies, preferences, special requests…"></textarea></div>
+                        <input type="hidden" id="b_source" value="online">
                         <div id="bk-error-msg" style="color:#a33;font-size:0.78rem;margin-bottom:0.8rem;display:none;"></div>
                         <button class="bk-submit" onclick="submitBooking()">Confirm Appointment Request</button>
                         </div>
@@ -429,6 +489,7 @@
                             <div class="bk-summary">
                                 <div class="bk-sum-title">Selected Services</div>
                                 <div id="bkSumList"></div>
+                                <div class="bk-duration-row" id="bkDurationRow" style="display:none;"><span>⏱ Estimated Duration</span><span id="bkDuration">—</span></div>
                                 <div class="bk-total"><span>Estimated Total</span><span id="bkTotal">₹0</span></div>
                             </div>
                             <div class="bk-location">
@@ -455,9 +516,34 @@
         <div class="footer-bottom"><span>© 2026 Misha Family Salon & Academy</span></div>
     </div>
 </div>
-        <a href="https://wa.me/919791538506" class="wa-float" target="_blank">
-            <img src="images/whatsapp.png" height="60px" width="70px" alt="Chat on WhatsApp">
 
+        <!-- PROMO POPUP OVERLAY -->
+        <div class="promo-popup-overlay" id="promoPopup">
+            <div class="promo-popup">
+                <button class="promo-popup-close" onclick="closePromoPopup()" aria-label="Close">&times;</button>
+                <div class="promo-popup-sparkle">✨</div>
+                <div class="promo-popup-header">
+                    <div class="promo-popup-badge">Limited Time</div>
+                    <h2 class="promo-popup-title serif">Current Promotions</h2>
+                    <p class="promo-popup-sub">Don't miss our exclusive offers at Misha Family Salon!</p>
+                </div>
+                <div class="promo-popup-offers" id="promoPopupOffers">
+                    <div style="text-align:center;padding:2rem;color:var(--taupe);font-size:0.82rem;">Loading offers…</div>
+                </div>
+                <div class="promo-popup-footer">
+                    <button class="btn-primary" onclick="closePromoPopup(); go('services');">Book Now &rarr;</button>
+                    <label class="promo-dont-show">
+                        <input type="checkbox" id="promoDontShow"> Don't show again today
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREMIUM WHATSAPP FLOATING BUTTON -->
+        <a href="https://wa.me/919791538506" class="wa-float" target="_blank" id="waFloat" aria-label="Chat on WhatsApp">
+            <div class="wa-float-pulse"></div>
+            <svg class="wa-float-icon" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            <span class="wa-float-label">Chat with us</span>
         </a>
         <script src="https://www.gstatic.com/firebasejs/12.12.1/firebase-app-compat.js"></script>
 

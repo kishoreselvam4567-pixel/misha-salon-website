@@ -67,6 +67,19 @@ const db = getFirestore(app);
                 stylists: []
             };
 
+            // ── LIVE OPEN/CLOSED STATUS ──
+            function updateLiveStatus() {
+                var badge = document.getElementById('liveStatusBadge');
+                if (!badge) return;
+                var now = new Date();
+                var hour = now.getHours();
+                var isOpen = hour >= 8 && hour < 21; // 8 AM to 9 PM
+                badge.className = 'live-status-badge ' + (isOpen ? 'open' : 'closed');
+                badge.innerHTML = '<span class="live-status-dot"></span>' + (isOpen ? 'Open Now' : 'Closed');
+            }
+            updateLiveStatus();
+            setInterval(updateLiveStatus, 60000); // Update every minute
+
             function startRealtimeSync() {
 
   // SERVICES
@@ -417,6 +430,7 @@ const db = getFirestore(app);
                     date: dt, time: tm,
                     stylist: stylist,
                     notes: document.getElementById('b_nt').value.trim() || '—',
+                    source: document.getElementById('b_source') ? document.getElementById('b_source').value : 'online',
                     submitted: new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
                     status: 'Pending'
                 };
@@ -442,6 +456,27 @@ const db = getFirestore(app);
                 var total = keys.reduce((a, k) => a + cart[k].price, 0);
                 document.getElementById('bkSumList').innerHTML = keys.map(k => '<div class="bk-item"><span class="bk-item-name">' + cart[k].name + '</span><span style="display:flex;align-items:center;"><span class="bk-item-price">₹' + cart[k].price.toLocaleString('en-IN') + '</span><button class="bk-item-remove" onclick="removeItem(\'' + k + '\')">×</button></span></div>').join('');
                 document.getElementById('bkTotal').textContent = '₹' + total.toLocaleString('en-IN');
+                // Show estimated duration
+                var totalMins = 0;
+                Object.keys(cart).forEach(function(k) {
+                    var svc = STORE.services.find(function(s) { return s.id === k; });
+                    if (svc && svc.duration) {
+                        var durStr = svc.duration.replace(/[^0-9.]/g, '');
+                        var mins = parseFloat(durStr) || 0;
+                        if (svc.duration.toLowerCase().includes('hr')) mins *= 60;
+                        totalMins += mins;
+                    }
+                });
+                var durRow = document.getElementById('bkDurationRow');
+                var durEl = document.getElementById('bkDuration');
+                if (totalMins > 0 && durRow && durEl) {
+                    var hrs = Math.floor(totalMins / 60);
+                    var remainMins = Math.round(totalMins % 60);
+                    durEl.textContent = hrs > 0 ? hrs + 'h ' + remainMins + 'min' : remainMins + ' min';
+                    durRow.style.display = 'flex';
+                } else if (durRow) {
+                    durRow.style.display = 'none';
+                }
                 populateStylistDropdown();
             }
             function removeItem(id) {

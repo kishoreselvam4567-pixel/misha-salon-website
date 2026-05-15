@@ -3,77 +3,123 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — Misha Family Salon </title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
-<!-- Firebase -->
- <link rel="stylesheet" href="admin.css">
- <link rel="icon" src="images/logo.webp">
+<title>Admin — Misha Family Salon</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="admin.css">
+<link rel="icon" href="images/logo.webp">
 </head>
 <body>
 
-<!-- ══ SECURE LOGIN ══ -->
+<!-- ══════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════ -->
 <div id="loginScreen">
   <div class="login-box">
-    <img src="images/logo.webp" width="50px" height="50px">
-    <div class="login-logo">Misha Family Salon & Academy</div>
+
+    <div class="login-logo-wrap">
+      <img src="images/logo.webp" alt="Misha Logo">
+    </div>
+    <div class="login-logo">Misha Family Salon</div>
     <div class="login-sub">Admin Panel — Secure Access</div>
-    <div class="secure-badge">🔐 Secured with Firebase Authentication</div>
-    <label class="login-lbl">Email Address</label>
-    <div class="login-iw">
-      <input type="email" id="emailInput" placeholder="Enter your email" onkeydown="if(event.key==='Enter')trySecureLogin()">
+
+    <!-- Role Tabs -->
+    <div class="login-type-tabs">
+      <button class="login-type-tab active" id="tabAdmin" onclick="switchLoginType('admin')">
+        👑 Admin Login
+      </button>
+      <button class="login-type-tab" id="tabWorker" onclick="switchLoginType('worker')">
+        💇 Worker Login
+      </button>
     </div>
-    <label class="login-lbl">Password</label>
-    <div class="login-iw">
-      <input type="password" id="passwordInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')trySecureLogin()">
-      <button class="eye-btn" onclick="togglePasswordVisibility()">👁</button>
+
+    <!-- Admin Login -->
+    <div class="login-form-section" id="adminLoginSection">
+      <div class="secure-badge">🔐 Firebase Authentication</div>
+      <label class="login-lbl">Email Address</label>
+      <div class="login-iw">
+        <input type="email" id="emailInput" placeholder="Enter your email"
+               onkeydown="if(event.key==='Enter')trySecureLogin()">
+      </div>
+      <label class="login-lbl">Password</label>
+      <div class="login-iw">
+        <input type="password" id="passwordInput" placeholder="••••••••"
+               onkeydown="if(event.key==='Enter')trySecureLogin()">
+        <button class="eye-btn" onclick="togglePasswordVisibility('passwordInput',this)">👁</button>
+      </div>
+      <div class="login-att" id="attTxt"></div>
+      <button class="login-btn" id="loginBtn" onclick="trySecureLogin()">Login Securely</button>
+      <div class="login-err" id="loginErr"></div>
     </div>
-    <div class="login-att" id="attTxt"></div>
-    <button class="login-btn" id="loginBtn" onclick="trySecureLogin()">Login Securely</button>
-    <div class="login-err" id="loginErr"></div>
+
+    <!-- Worker Login -->
+    <div class="login-form-section hidden" id="workerLoginSection">
+      <div class="worker-badge">🧑‍🤝‍🧑 Staff Access</div>
+      <label class="login-lbl">Username</label>
+      <div class="login-iw">
+        <input type="text" id="workerUsername" placeholder="Enter your username"
+               onkeydown="if(event.key==='Enter')tryWorkerLogin()">
+      </div>
+      <label class="login-lbl">Password</label>
+      <div class="login-iw">
+        <input type="password" id="workerPassword" placeholder="••••••••"
+               onkeydown="if(event.key==='Enter')tryWorkerLogin()">
+        <button class="eye-btn" onclick="togglePasswordVisibility('workerPassword',this)">👁</button>
+      </div>
+      <button class="login-btn" id="workerLoginBtn" onclick="tryWorkerLogin()">Sign In</button>
+      <div class="login-err" id="workerLoginErr"></div>
+    </div>
+
   </div>
 </div>
 
-<!-- ══ APP ══ -->
+<!-- ══════════════════════════════════════════════════
+     APP
+══════════════════════════════════════════════════ -->
 <div id="app">
-  <!-- SIDEBAR -->
+
+  <!-- Mobile Hamburger -->
   <button class="admin-hamburger" id="adminHamburger" onclick="toggleAdminSidebar()">
     <span></span><span></span><span></span>
   </button>
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar()"></div>
+
+  <!-- SIDEBAR -->
   <div class="sidebar" id="adminSidebar">
     <div class="sb-brand">
-      <div><img src="images/logo.webp" width="50px" height="50px"></div>
-      <div class="b1">Misha Family Salon</div>
-      <div class="b2">Admin Panel</div>
-      <div class="sb-badge">✅ Secured</div>
+      <div class="sb-brand-wrap">
+        <div class="sb-logo-circle">
+          <img src="images/logo.webp" alt="Misha">
+        </div>
+        <div>
+          <div class="b1">Misha Salon</div>
+          <div class="b2">Admin Panel</div>
+        </div>
+      </div>
+      <div class="sb-badge" id="sidebarRoleBadge">✅ Admin Secured</div>
     </div>
-    <div class="sb-nav">
-      <div class="sb-section">Overview</div>
-      <button class="sb-btn on" id="sb-dashboard" onclick="showPanel('dashboard',this)"><span class="icon">📊</span>Dashboard</button>
-      <div class="sb-section">Appointments</div>
-      <button class="sb-btn" id="sb-appointments" onclick="showPanel('appointments',this)"><span class="icon">📅</span>All Appointments</button>
-      <div class="sb-section">Manage Content</div>
-      <button class="sb-btn" id="sb-services" onclick="showPanel('services',this)"><span class="icon">✂️</span>Services & Prices</button>
-      <button class="sb-btn" id="sb-offers" onclick="showPanel('offers',this)"><span class="icon">🏷️</span>Offers & Promotions</button>
-      <button class="sb-btn" id="sb-gallery" onclick="showPanel('gallery',this)"><span class="icon">🖼️</span>Gallery Manager</button>
-      <button class="sb-btn" id="sb-stylists" onclick="showPanel('stylists',this)"><span class="icon">💇</span>Stylists</button>
+
+    <div class="sb-nav" id="adminSbNav">
+      <!-- Nav populated by JS based on role -->
     </div>
+
     <div class="sb-footer">
-      <button class="btn btn-outline" id="darkModeBtn" onclick="toggleDarkMode()">🌙 Dark Mode </button>
-      <br>
+      <button class="btn btn-outline btn-sm" id="darkModeBtn" onclick="toggleDarkMode()"
+              style="width:100%;justify-content:center;display:flex;align-items:center;gap:0.5rem;">
+        🌙 Dark Mode
+      </button>
       <button class="logout-btn" onclick="doLogout()">🔒 Log Out</button>
     </div>
   </div>
 
-  <!-- MAIN -->
+  <!-- MAIN CONTENT -->
   <div class="main">
 
-    <!-- DASHBOARD -->
+    <!-- ── DASHBOARD ── -->
     <div id="p-dashboard" class="panel on">
       <div class="panel-header">
         <div class="panel-eyebrow">Overview</div>
         <div class="panel-title">Dashboard</div>
-        <div class="panel-sub">Welcome back! Logged in securely.</div>
+        <div class="panel-sub" id="dashWelcome">Welcome back! Logged in securely.</div>
       </div>
       <div class="stats-row" id="dashStats"></div>
       <div class="card">
@@ -85,31 +131,21 @@
         <div class="dashboard-side-grid">
           <div class="card">
             <div class="card-header">
-               <div class="card-title">
-                Today's Appointments
-              </div>
+              <div class="card-title">Today's Appointments</div>
             </div>
-
             <div id="todayAppointments"></div>
-
-         </div>
-
-        <div class="card">
-          <div class="card-header">
-            <div class="card-title">
-              Pending Approvals
-            </div>
           </div>
-
-        <div id="pendingAppointments"></div>
-
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Pending Approvals</div>
+            </div>
+            <div id="pendingAppointments"></div>
+          </div>
+        </div>
       </div>
-
-    </div>
-      </div>
     </div>
 
-    <!-- APPOINTMENTS -->
+    <!-- ── APPOINTMENTS ── -->
     <div id="p-appointments" class="panel">
       <div class="panel-header">
         <div class="panel-eyebrow">Bookings</div>
@@ -120,26 +156,35 @@
         <div class="ctrl-row">
           <select id="fltStatus" onchange="renderAppts()">
             <option value="">All Statuses</option>
-            <option>Pending</option><option>Confirmed</option><option>Done</option><option>Cancelled</option>
+            <option>Pending</option>
+            <option>Confirmed</option>
+            <option>Done</option>
+            <option>Cancelled</option>
           </select>
-          <input type="text" id="srchClient" placeholder="Search name or phone…" oninput="renderAppts()" style="min-width:180px;">
-          <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="exportCSV()">Export CSV ↓</button>
+          <input type="text" id="srchClient" placeholder="Search name or phone…"
+                 oninput="renderAppts()" style="min-width:180px;">
+          <div class="date-range-filter">
+            <label style="font-size:0.65rem;color:var(--taupe);letter-spacing:0.1em;text-transform:uppercase;">Date Range:</label>
+            <input type="date" id="fltDateFrom" onchange="renderAppts()" style="font-size:0.75rem;">
+            <span style="color:var(--taupe);font-size:0.75rem;">to</span>
+            <input type="date" id="fltDateTo" onchange="renderAppts()" style="font-size:0.75rem;">
+            <button class="btn btn-outline btn-sm" onclick="clearDateFilter()">× Clear</button>
+          </div>
+          <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="exportCSV()">
+            Export CSV ↓
+          </button>
         </div>
         <div class="ctrl-row">
-          <label>
-            <input type="checkbox" id="selectAllAppointments">
-            Select All
+          <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;color:var(--taupe);">
+            <input type="checkbox" id="selectAllAppointments"> Select All
           </label>
-          <button class="btn btn-red"
-          onclick="deleteSelectedAppointments()">
-          Delete
-        </button>
-          </div>
+          <button class="btn btn-red btn-sm" onclick="deleteSelectedAppointments()">Delete Selected</button>
+        </div>
         <div class="table-wrap" id="apptTable"></div>
       </div>
     </div>
 
-    <!-- SERVICES -->
+    <!-- ── SERVICES ── -->
     <div id="p-services" class="panel">
       <div class="panel-header">
         <div class="panel-eyebrow">Content Management</div>
@@ -155,7 +200,7 @@
       </div>
     </div>
 
-    <!-- OFFERS -->
+    <!-- ── OFFERS ── -->
     <div id="p-offers" class="panel">
       <div class="panel-header">
         <div class="panel-eyebrow">Content Management</div>
@@ -168,7 +213,7 @@
       <div id="offerAdminList"></div>
     </div>
 
-    <!-- GALLERY -->
+    <!-- ── GALLERY ── -->
     <div id="p-gallery" class="panel">
       <div class="panel-header">
         <div class="panel-eyebrow">Content Management</div>
@@ -178,18 +223,18 @@
       <div class="card">
         <div class="card-header">
           <span class="card-title">Gallery Items</span>
-          <button class="btn btn-brown btn-sm" onclick="openGalModal()">+ Add Photo Slot</button>
+          <button class="btn btn-brown btn-sm" onclick="openGalModal()">+ Add Photo</button>
         </div>
         <div id="galMgrGrid"></div>
       </div>
     </div>
 
-    <!-- STYLISTS -->
+    <!-- ── STYLISTS ── -->
     <div id="p-stylists" class="panel">
       <div class="panel-header">
         <div class="panel-eyebrow">Content Management</div>
         <div class="panel-title">Stylists</div>
-        <div class="panel-sub">Add or remove stylists. They will appear as options during customer booking.</div>
+        <div class="panel-sub">Add or remove stylists shown during customer booking. You can create their worker login directly from here.</div>
       </div>
       <div style="display:flex;justify-content:flex-end;margin-bottom:1rem;">
         <button class="btn btn-brown" onclick="openStylistModal()">+ Add Stylist</button>
@@ -197,10 +242,51 @@
       <div id="stylistAdminList"></div>
     </div>
 
+    <!-- ── WORKER ACCOUNTS (Admin only) ── -->
+    <div id="p-workers" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Staff Management</div>
+        <div class="panel-title">Worker Accounts</div>
+        <div class="panel-sub">Create and manage staff login credentials.</div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Staff Accounts</span>
+          <button class="btn btn-brown btn-sm" onclick="openWorkerModal()">+ Add Worker</button>
+        </div>
+        <div id="workerAccountsList"></div>
+      </div>
+    </div>
+
+    </div>
+
+    <!-- ── STYLIST SCHEDULE ── -->
+    <div id="p-schedule" class="panel">
+      <div class="panel-header">
+        <div class="panel-eyebrow">Calendar</div>
+        <div class="panel-title">Stylist Schedule</div>
+        <div class="panel-sub">Weekly view of stylist bookings. Spot double bookings at a glance.</div>
+      </div>
+      <div class="card">
+        <div class="ctrl-row">
+          <button class="btn btn-outline btn-sm" onclick="shiftScheduleWeek(-1)">← Prev Week</button>
+          <span id="scheduleWeekLabel" style="font-size:0.82rem;font-weight:500;color:var(--brown);"></span>
+          <button class="btn btn-outline btn-sm" onclick="shiftScheduleWeek(1)">Next Week →</button>
+        </div>
+        <div class="schedule-grid-wrap" id="scheduleGridWrap">
+          <div class="empty-state">Loading schedule…</div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /main -->
 </div><!-- /app -->
 
-<!-- ══ SERVICE MODAL ══ -->
+<!-- ══════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════ -->
+
+<!-- Service Modal -->
 <div class="overlay" id="srvOverlay">
   <div class="modal">
     <div class="modal-head">
@@ -231,7 +317,7 @@
   </div>
 </div>
 
-<!-- ══ OFFER MODAL ══ -->
+<!-- Offer Modal -->
 <div class="overlay" id="offerOverlay">
   <div class="modal">
     <div class="modal-head">
@@ -254,7 +340,7 @@
   </div>
 </div>
 
-<!-- ══ GALLERY MODAL ══ -->
+<!-- Gallery Modal -->
 <div class="overlay" id="galOverlay">
   <div class="modal">
     <div class="modal-head">
@@ -269,6 +355,7 @@
           <option value="bridal">Bridal & Makeup</option>
           <option value="skin">Skin & Spa</option>
           <option value="nails">Nails</option>
+          <option value="beforeafter">Before & After</option>
           <option value="shop">Our Salon</option>
         </select>
       </div>
@@ -280,7 +367,7 @@
         </label>
         <div>
           <div style="font-size:0.78rem;color:var(--dark);font-weight:500;">Show in Homepage Preview</div>
-          <div style="font-size:0.68rem;color:var(--taupe);margin-top:2px;">Display this image in the homepage gallery highlights</div>
+          <div style="font-size:0.67rem;color:var(--taupe);margin-top:2px;">Display in homepage gallery highlights</div>
         </div>
       </div>
     </div>
@@ -291,9 +378,9 @@
   </div>
 </div>
 
-<!-- STATUS MODAL -->
+<!-- Status Modal -->
 <div class="overlay" id="statusOverlay">
-  <div class="modal" style="width:360px;">
+  <div class="modal" style="width:380px;">
     <div class="modal-head">
       <h3>Update Status</h3>
       <button class="modal-close" onclick="closeStatusModal()">×</button>
@@ -302,14 +389,16 @@
       <input type="hidden" id="statusEditId">
       <div class="fg"><label>New Status</label>
         <select id="statusSelect" onchange="toggleWaPreview()">
-          <option>Pending</option><option>Confirmed</option><option>Done</option><option>Cancelled</option>
+          <option>Pending</option>
+          <option>Confirmed</option>
+          <option>Done</option>
+          <option>Cancelled</option>
         </select>
       </div>
-      <!-- WhatsApp confirmation preview — shown only when Confirmed is selected -->
-      <div id="waConfirmBox" style="display:none;margin-top:0.8rem;background:#e8f5e9;border:1px solid rgba(45,122,74,0.25);padding:1rem;border-radius:3px;">
-        <div style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:#2d7a4a;margin-bottom:0.5rem;">📲 WhatsApp Confirmation</div>
-        <div id="waPreviewText" style="font-size:0.78rem;color:#2E1A0E;line-height:1.6;white-space:pre-wrap;"></div>
-        <div style="margin-top:0.8rem;font-size:0.68rem;color:#2d7a4a;">Clicking "Confirm & Send WhatsApp" will open WhatsApp with this message pre-filled.</div>
+      <div id="waConfirmBox" style="display:none;margin-top:0.8rem;background:#e8f5e9;border:1px solid rgba(42,122,74,0.22);padding:1rem;border-radius:6px;">
+        <div style="font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:#2a7a4a;margin-bottom:0.5rem;">📲 WhatsApp Confirmation</div>
+        <div id="waPreviewText" style="font-size:0.77rem;color:#1E110A;line-height:1.6;white-space:pre-wrap;"></div>
+        <div style="margin-top:0.8rem;font-size:0.66rem;color:#2a7a4a;">Clicking "Confirm & Send WhatsApp" will open WhatsApp pre-filled.</div>
       </div>
     </div>
     <div class="modal-foot">
@@ -320,9 +409,9 @@
   </div>
 </div>
 
-<!-- ══ STYLIST MODAL ══ -->
+<!-- Stylist Modal -->
 <div class="overlay" id="stylistOverlay">
-  <div class="modal" style="width:400px;">
+  <div class="modal" style="width:420px;">
     <div class="modal-head">
       <h3 id="stylistModalTitle">Add Stylist</h3>
       <button class="modal-close" onclick="closeStylistModal()">×</button>
@@ -332,6 +421,25 @@
       <div class="fg"><label>Full Name *</label><input type="text" id="stylistName" placeholder="e.g. Priya Sharma"></div>
       <div class="fg"><label>Specialisation</label><input type="text" id="stylistSpec" placeholder="e.g. Hair Colour, Bridal"></div>
       <div class="fg"><label>Experience</label><input type="text" id="stylistExp" placeholder="e.g. 5 years"></div>
+      <div class="fg">
+        <label>Photo URL <span style="font-size:0.68rem;color:var(--taupe);font-weight:400;">(optional)</span></label>
+        <input type="text" id="stylistImg" placeholder="https://your-image-url.jpg">
+        <div style="font-size:0.68rem;color:var(--taupe);margin-top:0.3rem;">Leave blank to use a default avatar. Shown on the booking page.</div>
+      </div>
+      <div class="fg" style="flex-direction:row;align-items:center;gap:0.8rem;">
+        <label style="font-size:0.78rem;font-weight:500;color:var(--dark);min-width:130px;">Also create worker login?</label>
+        <label class="switch" style="flex-shrink:0;">
+          <input type="checkbox" id="stylistCreateWorker" onchange="toggleStylistWorkerFields()">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div id="stylistWorkerFields" style="display:none;border:1px solid var(--border);padding:0.9rem 1rem;border-radius:6px;background:rgba(201,169,122,0.05);margin-top:0.2rem;">
+        <div style="font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--taupe);margin-bottom:0.8rem;">Worker Login Credentials</div>
+        <div class="fr">
+          <div class="fg"><label>Username *</label><input type="text" id="stylistWorkerUname" placeholder="e.g. priya2024"></div>
+          <div class="fg"><label>Password *</label><input type="password" id="stylistWorkerPass" placeholder="Min 4 chars"></div>
+        </div>
+      </div>
     </div>
     <div class="modal-foot">
       <button class="btn btn-outline" onclick="closeStylistModal()">Cancel</button>
@@ -340,7 +448,447 @@
   </div>
 </div>
 
+<!-- Worker Account Modal -->
+<div class="overlay" id="workerOverlay">
+  <div class="modal" style="width:440px;">
+    <div class="modal-head">
+      <h3 id="workerModalTitle">Add Worker Account</h3>
+      <button class="modal-close" onclick="closeWorkerModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="workerEditId">
+      <div class="fg"><label>Full Name *</label><input type="text" id="workerName" placeholder="e.g. Anitha Kumari"></div>
+      <div class="fr">
+        <div class="fg"><label>Username *</label><input type="text" id="workerUname" placeholder="e.g. anitha2024"></div>
+        <div class="fg"><label>Role</label>
+          <select id="workerRole">
+            <option value="receptionist">Receptionist</option>
+            <option value="stylist">Stylist</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg">
+        <label id="workerPassLbl">Password *</label>
+        <div style="position:relative;">
+          <input type="password" id="workerPass" placeholder="Create a password" style="width:100%">
+          <button class="eye-btn" style="right:0.9rem;" onclick="togglePasswordVisibility('workerPass',this)">👁</button>
+        </div>
+      </div>
+      <div class="fg" id="workerPassConfirmFg">
+        <label>Confirm Password *</label>
+        <input type="password" id="workerPassConfirm" placeholder="Repeat password">
+      </div>
+      <div style="background:rgba(201,169,122,0.08);border:1px solid var(--border);padding:0.8rem 1rem;border-radius:6px;font-size:0.73rem;color:var(--taupe);line-height:1.5;">
+        ℹ️ Worker accounts can view appointments and update statuses. Only admins can manage services, offers, gallery, and worker accounts.
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeWorkerModal()">Cancel</button>
+      <button class="btn btn-brown" onclick="saveWorkerAccount()">Save Account</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
+
 <script type="module" src="admin.js"></script>
+
+<!-- Worker Login & UI Enhancements -->
+<script>
+// ════════════════════════════════════════════════
+// LOGIN TYPE SWITCHER
+// ════════════════════════════════════════════════
+window.switchLoginType = function(type) {
+  const adminSection  = document.getElementById('adminLoginSection');
+  const workerSection = document.getElementById('workerLoginSection');
+  const tabAdmin  = document.getElementById('tabAdmin');
+  const tabWorker = document.getElementById('tabWorker');
+
+  if (type === 'admin') {
+    adminSection.classList.remove('hidden');
+    workerSection.classList.add('hidden');
+    tabAdmin.classList.add('active');
+    tabWorker.classList.remove('active');
+  } else {
+    workerSection.classList.remove('hidden');
+    adminSection.classList.add('hidden');
+    tabWorker.classList.add('active');
+    tabAdmin.classList.remove('active');
+    document.getElementById('workerLoginErr').style.display = 'none';
+  }
+};
+
+// ════════════════════════════════════════════════
+// PASSWORD VISIBILITY
+// ════════════════════════════════════════════════
+window.togglePasswordVisibility = function(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  input.type = input.type === 'password' ? 'text' : 'password';
+  if (btn) btn.textContent = input.type === 'password' ? '👁' : '🙈';
+};
+
+// ════════════════════════════════════════════════
+// WORKER ACCOUNTS (localStorage-based)
+// ════════════════════════════════════════════════
+
+function getWorkerAccounts() {
+  try { return JSON.parse(localStorage.getItem('misha_workers') || '[]'); }
+  catch(e) { return []; }
+}
+
+function saveWorkerAccounts(workers) {
+  localStorage.setItem('misha_workers', JSON.stringify(workers));
+}
+
+// Simple hash (for demo — in production use bcrypt/server-side)
+function simpleHash(str) {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  }
+  return h.toString(36);
+}
+
+// Worker Login
+window.tryWorkerLogin = function() {
+  const username = document.getElementById('workerUsername').value.trim();
+  const password = document.getElementById('workerPassword').value;
+  const errEl = document.getElementById('workerLoginErr');
+  const btn = document.getElementById('workerLoginBtn');
+
+  if (!username || !password) {
+    errEl.textContent = 'Please enter username and password.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  errEl.style.display = 'none';
+
+  setTimeout(() => {
+    const workers = getWorkerAccounts();
+    const hash = simpleHash(password);
+    const found = workers.find(w => w.username === username && w.passHash === hash && w.active !== false);
+
+    if (found) {
+      sessionStorage.setItem('misha_worker_session', JSON.stringify({ name: found.name, username: found.username, role: found.role }));
+      enterWorkerMode(found);
+    } else {
+      errEl.textContent = 'Invalid username or password.';
+      errEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Sign In';
+    }
+  }, 600);
+};
+
+window.toggleStylistWorkerFields = function() {
+  const cb = document.getElementById('stylistCreateWorker');
+  const fields = document.getElementById('stylistWorkerFields');
+  if (fields) fields.style.display = cb.checked ? 'block' : 'none';
+};
+
+function enterWorkerMode(worker) {
+  // Store session for filtering
+  window._workerSession = { name: worker.name, username: worker.username, role: worker.role };
+
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('app').classList.add('on');
+
+  // Update sidebar for worker role
+  const badge = document.getElementById('sidebarRoleBadge');
+  badge.textContent = '👷 ' + (worker.role.charAt(0).toUpperCase() + worker.role.slice(1));
+  badge.className = 'sb-worker-badge';
+
+  // Show limited nav
+  buildSidebarNav('worker');
+
+  const welcome = document.getElementById('dashWelcome');
+  if (welcome) welcome.textContent = 'Welcome, ' + worker.name + '! Showing your appointments.';
+
+  // Load data if Firebase is available (admin.js exposes loadStoreFromFirebase)
+  if (window.loadStoreForWorker) window.loadStoreForWorker();
+
+  patchShowPanel();
+  showPanelSafe('dashboard');
+}
+
+function buildSidebarNav(role) {
+  const nav = document.getElementById('adminSbNav');
+  const adminItems = `
+    <div class="sb-section">Overview</div>
+    <button class="sb-btn on" id="sb-dashboard" onclick="showPanel('dashboard',this)"><span class="icon">📊</span>Dashboard</button>
+    <div class="sb-section">Appointments</div>
+    <button class="sb-btn" id="sb-appointments" onclick="showPanel('appointments',this)"><span class="icon">📅</span>All Appointments</button>
+    <button class="sb-btn" id="sb-schedule" onclick="showPanel('schedule',this)"><span class="icon">🗓️</span>Stylist Schedule</button>
+    <div class="sb-section">Manage Content</div>
+    <button class="sb-btn" id="sb-services" onclick="showPanel('services',this)"><span class="icon">✂️</span>Services & Prices</button>
+    <button class="sb-btn" id="sb-offers" onclick="showPanel('offers',this)"><span class="icon">🏷️</span>Offers & Promotions</button>
+    <button class="sb-btn" id="sb-gallery" onclick="showPanel('gallery',this)"><span class="icon">🖼️</span>Gallery Manager</button>
+    <button class="sb-btn" id="sb-stylists" onclick="showPanel('stylists',this)"><span class="icon">💇</span>Stylists</button>
+    <div class="sb-section">Staff</div>
+    <button class="sb-btn" id="sb-workers" onclick="showPanel('workers',this)"><span class="icon">👥</span>Worker Accounts</button>
+  `;
+  const workerItems = `
+    <div class="sb-section">Overview</div>
+    <button class="sb-btn on" id="sb-dashboard" onclick="showPanel('dashboard',this)"><span class="icon">📊</span>Dashboard</button>
+    <div class="sb-section">Appointments</div>
+    <button class="sb-btn" id="sb-appointments" onclick="showPanel('appointments',this)"><span class="icon">📅</span>Appointments</button>
+  `;
+  nav.innerHTML = role === 'admin' ? adminItems : workerItems;
+}
+
+function showPanelSafe(id) {
+  if (window.showPanel) window.showPanel(id);
+  else {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+    const p = document.getElementById('p-' + id);
+    if (p) p.classList.add('on');
+  }
+}
+
+// Called when Firebase admin logs in — set admin nav
+window.onAdminLogin = function(userName) {
+  buildSidebarNav('admin');
+  document.getElementById('sidebarRoleBadge').textContent = '✅ Admin Secured';
+  document.getElementById('sidebarRoleBadge').className = 'sb-badge';
+  const welcome = document.getElementById('dashWelcome');
+  if (welcome) welcome.textContent = 'Welcome back, ' + (userName || 'Admin') + '!';
+};
+
+// ════════════════════════════════════════════════
+// WORKER ACCOUNT CRUD
+// ════════════════════════════════════════════════
+
+window.openWorkerModal = function() {
+  document.getElementById('workerEditId').value = '';
+  document.getElementById('workerName').value = '';
+  document.getElementById('workerUname').value = '';
+  document.getElementById('workerPass').value = '';
+  document.getElementById('workerPassConfirm').value = '';
+  document.getElementById('workerRole').value = 'receptionist';
+  document.getElementById('workerModalTitle').textContent = 'Add Worker Account';
+  document.getElementById('workerPassLbl').textContent = 'Password *';
+  document.getElementById('workerPassConfirmFg').style.display = 'flex';
+  document.getElementById('workerOverlay').classList.add('on');
+};
+
+window.openEditWorkerModal = function(username) {
+  const workers = getWorkerAccounts();
+  const w = workers.find(x => x.username === username);
+  if (!w) return;
+  document.getElementById('workerEditId').value = username;
+  document.getElementById('workerName').value = w.name;
+  document.getElementById('workerUname').value = w.username;
+  document.getElementById('workerPass').value = '';
+  document.getElementById('workerPassConfirm').value = '';
+  document.getElementById('workerRole').value = w.role || 'receptionist';
+  document.getElementById('workerModalTitle').textContent = 'Edit Worker Account';
+  document.getElementById('workerPassLbl').textContent = 'New Password (leave blank to keep)';
+  document.getElementById('workerPassConfirmFg').style.display = 'flex';
+  document.getElementById('workerOverlay').classList.add('on');
+};
+
+window.closeWorkerModal = function() {
+  document.getElementById('workerOverlay').classList.remove('on');
+};
+
+window.saveWorkerAccount = function() {
+  const editId = document.getElementById('workerEditId').value;
+  const name = document.getElementById('workerName').value.trim();
+  const uname = document.getElementById('workerUname').value.trim().toLowerCase();
+  const pass = document.getElementById('workerPass').value;
+  const passConfirm = document.getElementById('workerPassConfirm').value;
+  const role = document.getElementById('workerRole').value;
+
+  if (!name || !uname) { showToast('Name and username are required.'); return; }
+  if (!editId && !pass) { showToast('Password is required for new accounts.'); return; }
+  if (pass && pass !== passConfirm) { showToast('Passwords do not match.'); return; }
+  if (pass && pass.length < 4) { showToast('Password must be at least 4 characters.'); return; }
+
+  const workers = getWorkerAccounts();
+
+  if (editId) {
+    const idx = workers.findIndex(w => w.username === editId);
+    if (idx === -1) { showToast('Worker not found.'); return; }
+    // Check username conflict (excluding current)
+    if (uname !== editId && workers.find(w => w.username === uname)) {
+      showToast('Username already taken.'); return;
+    }
+    workers[idx].name = name;
+    workers[idx].username = uname;
+    workers[idx].role = role;
+    if (pass) workers[idx].passHash = simpleHash(pass);
+  } else {
+    if (workers.find(w => w.username === uname)) {
+      showToast('Username already taken.'); return;
+    }
+    workers.push({ name, username: uname, role, passHash: simpleHash(pass), active: true });
+  }
+
+  saveWorkerAccounts(workers);
+  closeWorkerModal();
+  renderWorkerAccounts();
+  showToast(editId ? 'Worker updated.' : 'Worker account created!');
+};
+
+window.toggleWorkerActive = function(username) {
+  const workers = getWorkerAccounts();
+  const w = workers.find(x => x.username === username);
+  if (w) {
+    w.active = !w.active;
+    saveWorkerAccounts(workers);
+    renderWorkerAccounts();
+    showToast(w.active ? 'Account activated.' : 'Account deactivated.');
+  }
+};
+
+window.deleteWorkerAccount = function(username) {
+  if (!confirm('Remove this worker account?')) return;
+  const workers = getWorkerAccounts().filter(w => w.username !== username);
+  saveWorkerAccounts(workers);
+  renderWorkerAccounts();
+  showToast('Worker removed.');
+};
+
+window.renderWorkerAccounts = function() {
+  const container = document.getElementById('workerAccountsList');
+  if (!container) return;
+  const workers = getWorkerAccounts();
+  const roleIcons = { receptionist: '🗓️', stylist: '💇', manager: '📋' };
+  const roleNames = { receptionist: 'Receptionist', stylist: 'Stylist', manager: 'Manager' };
+
+  if (!workers.length) {
+    container.innerHTML = '<div class="empty-state">No worker accounts yet. Add your first staff member above.</div>';
+    return;
+  }
+
+  container.innerHTML = '<div class="worker-list">' +
+    workers.map(w => `
+      <div class="worker-row${w.active === false ? '" style="opacity:0.45;' : ''}">
+        <div class="worker-avatar">${(roleIcons[w.role] || '👤')}</div>
+        <div class="worker-info">
+          <div class="worker-name">${w.name}</div>
+          <div class="worker-username">@${w.username}</div>
+        </div>
+        <span class="worker-role-badge">${roleNames[w.role] || w.role}</span>
+        <div class="worker-actions">
+          <button class="btn btn-outline btn-sm" onclick="openEditWorkerModal('${w.username}')">Edit</button>
+          <button class="btn ${w.active !== false ? 'btn-outline' : 'btn-green'} btn-sm"
+                  onclick="toggleWorkerActive('${w.username}')">${w.active !== false ? 'Disable' : 'Enable'}</button>
+          <button class="btn btn-red btn-sm" onclick="deleteWorkerAccount('${w.username}')">Remove</button>
+        </div>
+      </div>
+    `).join('') +
+  '</div>';
+};
+
+function showToast(msg) {
+  if (window.toast) { window.toast(msg); return; }
+  const t = document.getElementById('toast');
+  if (t) { t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+}
+
+// Override showPanel to trigger worker accounts render
+// Uses a lazy override so admin.js module has time to define window.showPanel first
+window._workerShowPanelPatched = false;
+function patchShowPanel() {
+  if (window._workerShowPanelPatched) return;
+  if (!window.showPanel) return;
+  const _origShowPanel = window.showPanel;
+  window.showPanel = function(id, btn) {
+    _origShowPanel(id, btn);
+    if (id === 'workers') renderWorkerAccounts();
+  };
+  window._workerShowPanelPatched = true;
+}
+// Patch as soon as possible (after module loads)
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(patchShowPanel, 0);
+});
+
+// ── WORKER SESSION: filter appointments by stylist name ──
+window._workerSession = null;
+(function initWorkerSession() {
+  const sess = sessionStorage.getItem('misha_worker_session');
+  if (sess) {
+    try { window._workerSession = JSON.parse(sess); } catch(e) {}
+  }
+})();
+
+// Intercept renderAppts to filter for worker view
+window._workerApptFilter = function(bookings) {
+  const sess = window._workerSession;
+  if (!sess) return bookings;
+  // Filter bookings where stylist name matches worker's name
+  return bookings.filter(b =>
+    b.stylist && b.stylist.toLowerCase() === sess.name.toLowerCase()
+  );
+};
+
+// Hook into renderAppts after admin.js loads
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    if (window.renderAppts && !window._apptFilterPatched) {
+      window._apptFilterPatched = true;
+      const _origRender = window.renderAppts;
+      window.renderAppts = function() {
+        if (window._workerSession) {
+          // Worker mode: show only their appointments
+          _origRender();
+          // After render, add a notice
+          const table = document.getElementById('apptTable');
+          if (table) {
+            const notice = document.createElement('div');
+            notice.style.cssText = 'font-size:0.72rem;color:var(--taupe);margin-bottom:0.6rem;padding:0.5rem 0.8rem;background:rgba(201,169,122,0.08);border-radius:4px;border:1px solid var(--border);';
+            notice.textContent = '👤 Showing your appointments only (' + window._workerSession.name + ')';
+            table.parentNode.insertBefore(notice, table);
+          }
+        } else {
+          _origRender();
+        }
+      };
+    }
+  }, 200);
+});
+
+// ════════════════════════════════════════════════
+// WORKER SESSION CHECK
+// ════════════════════════════════════════════════
+(function checkWorkerSession() {
+  const session = sessionStorage.getItem('misha_worker_session');
+  if (session) {
+    try {
+      const w = JSON.parse(session);
+      enterWorkerMode(w);
+    } catch(e) { sessionStorage.removeItem('misha_worker_session'); }
+  }
+})();
+
+// ── Extend doLogout to also clear worker session
+const _origLogout = window.doLogout;
+window.doLogout = async function() {
+  sessionStorage.removeItem('misha_worker_session');
+  if (_origLogout) await _origLogout();
+  // Reset login tabs
+  switchLoginType('admin');
+  buildSidebarNav('admin');
+};
+
+// ── Admin login hook: patch onAuthStateChanged behavior
+// admin.js will call window.onAdminLogin if we expose it before its module runs
+// Ensure admin sidebar is set when admin logs in via Firebase
+document.addEventListener('adminLoggedIn', function(e) {
+  window.onAdminLogin(e.detail && e.detail.email);
+});
+
+// Also build admin nav immediately on DOMContentLoaded as default
+document.addEventListener('DOMContentLoaded', function() {
+  buildSidebarNav('admin');
+});
+</script>
 </body>
 </html>

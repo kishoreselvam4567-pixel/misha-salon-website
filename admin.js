@@ -70,13 +70,16 @@ async function trySecureLogin() {
   }
 }
 
-function togglePasswordVisibility() {
-  const input = document.getElementById('passwordInput');
-  input.type = input.type === 'password' ? 'text' : 'password';
+function togglePasswordVisibility(inputId, btn) {
+  // Handled by inline script in HTML; this is kept for backwards compat
+  const id = inputId || 'passwordInput';
+  const input = document.getElementById(id);
+  if (input) input.type = input.type === 'password' ? 'text' : 'password';
 }
 
 async function doLogout() {
   try {
+    sessionStorage.removeItem('misha_worker_session');
     await signOut(auth);
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('app').classList.remove('on');
@@ -96,10 +99,15 @@ onAuthStateChanged(auth, (user) => {
     document.getElementById('app').classList.add('on');
     loadStoreFromFirebase();
     initDashboard();
+    // Notify UI about admin login
+    if (window.onAdminLogin) window.onAdminLogin(user.email);
+    document.dispatchEvent(new CustomEvent('adminLoggedIn', { detail: { email: user.email } }));
   } else {
-    // User is logged out
-    document.getElementById('loginScreen').classList.remove('hidden');
-    document.getElementById('app').classList.remove('on');
+    // User is logged out — only hide app if not in worker session
+    if (!sessionStorage.getItem('misha_worker_session')) {
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('app').classList.remove('on');
+    }
   }
 });
 
@@ -182,6 +190,8 @@ function showPanel(id, btn) {
   if (id === 'offers') renderOfferAdmin();
   if (id === 'gallery') renderGalAdmin();
   if (id === 'stylists') renderStylistAdmin();
+  if (id === 'schedule') renderSchedule();
+  if (id === 'workers' && window.renderWorkerAccounts) window.renderWorkerAccounts();
 
   // Close mobile sidebar
   if (window.innerWidth <= 768) {
@@ -324,15 +334,35 @@ function sc(n, l) {
 function renderAppts() {
   var stf = document.getElementById('fltStatus').value;
   var s = document.getElementById('srchClient').value.toLowerCase();
-  var f = STORE.bookings.filter(b => {
+  var dateFrom = document.getElementById('fltDateFrom') ? document.getElementById('fltDateFrom').value : '';
+  var dateTo = document.getElementById('fltDateTo') ? document.getElementById('fltDateTo').value : '';
+
+  // Worker mode: only show their own appointments
+  var allBookings = STORE.bookings;
+  var workerSess = null;
+  try { workerSess = JSON.parse(sessionStorage.getItem('misha_worker_session')); } catch(e) {}
+  if (workerSess) {
+    allBookings = allBookings.filter(b =>
+      b.stylist && b.stylist.toLowerCase() === workerSess.name.toLowerCase()
+    );
+  }
+
+  var f = allBookings.filter(b => {
     if (stf && b.status !== stf) return false;
     if (s && !b.name.toLowerCase().includes(s) && !b.phone.includes(s)) return false;
+    if (dateFrom && b.date && b.date < dateFrom) return false;
+    if (dateTo && b.date && b.date > dateTo) return false;
     return true;
   });
   var w = document.getElementById('apptTable');
-  if (!f.length) { w.innerHTML = '<div class="empty-state">No appointments found.</div>'; return; }
-  w.innerHTML = '<table><thead><tr><th>Select</th><th>ID</th><th>Client</th><th>Contact</th><th>Services</th><th>Stylist</th><th>Date & Time</th><th>Total</th><th>Notes</th><th>Status</th><th>Action</th></tr></thead><tbody>' +
-    f.map(b => '<tr><td><input type="checkbox" class="appt-checkbox" value="' + b.id + '"> </td> <td><strong>' + b.id + '</strong></td><td> <button class="btn btn-outline btn-sm" onclick="openCustomerHistory(\'' + b.phone + '\')">' + b.name + '</button> </td><td>' + b.phone + '</td><td>' + (b.services || []).map(s => '<span class="tag">' + s + '</span>').join('') + '</td><td style="color:var(--brown);font-size:0.78rem;">' + (b.stylist || '—') + '</td><td><strong>' + fmtD(b.date) + '</strong><br>' + b.time + '</td><td><strong style="color:var(--brown);">₹' + (b.total || 0).toLocaleString('en-IN') + '</strong></td><td style="max-width:130px;font-size:0.72rem;color:var(--taupe);">' + (b.notes || '') + '</td><td>' + statusBadge(b.status) + '</td><td><button class="btn btn-outline btn-sm" onclick="openStatusModal(\'' + b.id + '\',\'' + b.status + '\')">Edit</button></td></tr>').join('') +
+  if (workerSess) {
+    var notice = '<div style="font-size:0.72rem;color:var(--taupe);margin-bottom:0.6rem;padding:0.5rem 0.8rem;background:rgba(201,169,122,0.08);border-radius:4px;border:1px solid var(--border);">👤 Showing your appointments only — <strong>' + workerSess.name + '</strong></div>';
+  } else {
+    var notice = '';
+  }
+  if (!f.length) { w.innerHTML = notice + '<div class="empty-state">No appointments found.</div>'; return; }
+  w.innerHTML = notice + '<table><thead><tr><th>Select</th><th>ID</th><th>Client</th><th>Contact</th><th>Services</th><th>Stylist</th><th>Date & Time</th><th>Total</th><th>Source</th><th>Notes</th><th>Status</th><th>Action</th></tr></thead><tbody>' +
+    f.map(b => '<tr><td><input type="checkbox" class="appt-checkbox" value="' + b.id + '"> </td> <td><strong>' + b.id + '</strong></td><td> <button class="btn btn-outline btn-sm" onclick="openCustomerHistory(\'' + b.phone + '\')">' + b.name + '</button> </td><td>' + b.phone + '</td><td>' + (b.services || []).map(s => '<span class="tag">' + s + '</span>').join('') + '</td><td style="color:var(--brown);font-size:0.78rem;">' + (b.stylist || '—') + '</td><td><strong>' + fmtD(b.date) + '</strong><br>' + b.time + '</td><td><strong style="color:var(--brown);">₹' + (b.total || 0).toLocaleString('en-IN') + '</strong></td><td><span class="tag">' + (b.source || 'online') + '</span></td><td style="max-width:130px;font-size:0.72rem;color:var(--taupe);">' + (b.notes || '') + '</td><td>' + statusBadge(b.status) + '</td><td><button class="btn btn-outline btn-sm" onclick="openStatusModal(\'' + b.id + '\',\'' + b.status + '\')">Edit</button></td></tr>').join('') +
     '</tbody></table>';
 }
 
@@ -648,17 +678,27 @@ function renderStylistAdmin() {
     w.innerHTML = '<div class="empty-state">No stylists added yet. Add your first stylist above.</div>';
     return;
   }
-  w.innerHTML = '<div class="card"><div>' + STORE.stylists.map(s =>
-    '<div class="srv-admin-row' + (s.active ? '' : ' inactive') + '">'
-    + '<span class="srv-admin-name">💇 ' + s.name + '</span>'
-    + '<span class="srv-admin-cat">' + (s.spec || '—') + '</span>'
-    + '<span class="srv-admin-dur">' + (s.exp || '—') + '</span>'
-    + '<span class="srv-admin-actions">'
-    + '<button class="btn btn-outline btn-sm" onclick="editStylist(\'' + s.id + '\')">Edit</button>'
-    + '<button class="btn ' + (s.active ? 'btn-outline' : 'btn-green') + ' btn-sm" onclick="toggleStylist(\'' + s.id + '\')">' + (s.active ? 'Deactivate' : 'Activate') + '</button>'
-    + '<button class="btn btn-red btn-sm" onclick="deleteStylist(\'' + s.id + '\')">Delete</button>'
-    + '</span></div>'
-  ).join('') + '</div></div>';
+  w.innerHTML = '<div class="card"><div>' + STORE.stylists.map(s => {
+    var avatar = s.img
+      ? '<img src="' + s.img + '" style="width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;" onerror="this.style.display=\'none\'">'
+      : '<div style="width:38px;height:38px;border-radius:50%;background:var(--beige);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;">💇</div>';
+    var workerWorkers = [];
+    try { workerWorkers = JSON.parse(localStorage.getItem('misha_workers') || '[]'); } catch(e) {}
+    var hasLogin = workerWorkers.find(wk => wk.name && wk.name.toLowerCase() === s.name.toLowerCase());
+    var loginBadge = hasLogin
+      ? '<span style="font-size:0.6rem;background:rgba(42,122,74,0.1);color:#2a7a4a;border:1px solid rgba(42,122,74,0.2);padding:0.15rem 0.5rem;border-radius:3px;margin-left:0.4rem;">✓ Has Login</span>'
+      : '<span style="font-size:0.6rem;background:rgba(201,169,122,0.12);color:var(--taupe);border:1px solid var(--border);padding:0.15rem 0.5rem;border-radius:3px;margin-left:0.4rem;">No Login</span>';
+    return '<div class="srv-admin-row' + (s.active ? '' : ' inactive') + '" style="gap:0.8rem;">'
+      + avatar
+      + '<span class="srv-admin-name" style="display:flex;align-items:center;gap:0.3rem;">' + s.name + loginBadge + '</span>'
+      + '<span class="srv-admin-cat">' + (s.spec || '—') + '</span>'
+      + '<span class="srv-admin-dur">' + (s.exp || '—') + '</span>'
+      + '<span class="srv-admin-actions">'
+      + '<button class="btn btn-outline btn-sm" onclick="editStylist(\'' + s.id + '\')">Edit</button>'
+      + '<button class="btn ' + (s.active ? 'btn-outline' : 'btn-green') + ' btn-sm" onclick="toggleStylist(\'' + s.id + '\')">' + (s.active ? 'Deactivate' : 'Activate') + '</button>'
+      + '<button class="btn btn-red btn-sm" onclick="deleteStylist(\'' + s.id + '\')">Delete</button>'
+      + '</span></div>';
+  }).join('') + '</div></div>';
 }
 
 function openStylistModal() {
@@ -666,6 +706,11 @@ function openStylistModal() {
   document.getElementById('stylistName').value = '';
   document.getElementById('stylistSpec').value = '';
   document.getElementById('stylistExp').value = '';
+  document.getElementById('stylistImg').value = '';
+  document.getElementById('stylistCreateWorker').checked = false;
+  document.getElementById('stylistWorkerFields').style.display = 'none';
+  document.getElementById('stylistWorkerUname').value = '';
+  document.getElementById('stylistWorkerPass').value = '';
   document.getElementById('stylistModalTitle').textContent = 'Add Stylist';
   document.getElementById('stylistOverlay').classList.add('on');
 }
@@ -677,6 +722,11 @@ function editStylist(id) {
   document.getElementById('stylistName').value = s.name;
   document.getElementById('stylistSpec').value = s.spec || '';
   document.getElementById('stylistExp').value = s.exp || '';
+  document.getElementById('stylistImg').value = s.img || '';
+  document.getElementById('stylistCreateWorker').checked = false;
+  document.getElementById('stylistWorkerFields').style.display = 'none';
+  document.getElementById('stylistWorkerUname').value = '';
+  document.getElementById('stylistWorkerPass').value = '';
   document.getElementById('stylistModalTitle').textContent = 'Edit Stylist';
   document.getElementById('stylistOverlay').classList.add('on');
 }
@@ -689,6 +739,24 @@ async function saveStylist() {
   var name = document.getElementById('stylistName').value.trim();
   if (!name) { toast('Name is required.'); return; }
   var editId = document.getElementById('stylistEditId').value;
+  var img = document.getElementById('stylistImg').value.trim();
+
+  // Check if also creating worker login
+  var createWorker = document.getElementById('stylistCreateWorker').checked;
+  var workerUname = '';
+  var workerPass = '';
+  if (createWorker) {
+    workerUname = document.getElementById('stylistWorkerUname').value.trim().toLowerCase();
+    workerPass = document.getElementById('stylistWorkerPass').value;
+    if (!workerUname || !workerPass) { toast('Username and password required for worker login.'); return; }
+    if (workerPass.length < 4) { toast('Password must be at least 4 characters.'); return; }
+    var existingWorkers = [];
+    try { existingWorkers = JSON.parse(localStorage.getItem('misha_workers') || '[]'); } catch(e) {}
+    if (existingWorkers.find(w => w.username === workerUname)) {
+      toast('Worker username already taken.'); return;
+    }
+  }
+
   if (!STORE.stylists) STORE.stylists = [];
   try {
     if (editId) {
@@ -697,18 +765,36 @@ async function saveStylist() {
         s.name = name;
         s.spec = document.getElementById('stylistSpec').value.trim();
         s.exp = document.getElementById('stylistExp').value.trim();
+        if (img) s.img = img; else delete s.img;
         await setDoc(doc(db, 'stylists', editId), s);
       }
     } else {
       var newS = { name: name, spec: document.getElementById('stylistSpec').value.trim(), exp: document.getElementById('stylistExp').value.trim(), active: true };
+      if (img) newS.img = img;
       var newId = 'st' + Date.now();
       await setDoc(doc(db, 'stylists', newId), newS);
       newS.id = newId;
       STORE.stylists.push(newS);
     }
+
+    // Create worker account if requested
+    if (createWorker) {
+      var workers = [];
+      try { workers = JSON.parse(localStorage.getItem('misha_workers') || '[]'); } catch(e) {}
+      function simpleHashLocal(str) {
+        let h = 0;
+        for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+        return h.toString(36);
+      }
+      workers.push({ name: name, username: workerUname, role: 'stylist', passHash: simpleHashLocal(workerPass), active: true });
+      localStorage.setItem('misha_workers', JSON.stringify(workers));
+      toast('Stylist saved + worker login created!');
+    } else {
+      toast('Stylist saved!');
+    }
+
     closeStylistModal();
     renderStylistAdmin();
-    toast('Stylist saved!');
   } catch (err) {
     console.error(err);
     toast('Error saving stylist');
@@ -742,7 +828,7 @@ async function deleteStylist(id) {
 // ════════════════════════════════════════════════════════���═════════════
 
 var galColors = ['linear-gradient(135deg,#c9a484,#8a6040)', 'linear-gradient(135deg,#b89470,#6a4028)', 'linear-gradient(135deg,#d4b090,#a07050)', 'linear-gradient(135deg,#8a6850,#604030)', 'linear-gradient(135deg,#c0987a,#805040)', 'linear-gradient(135deg,#a08060,#705030)'];
-var galIcons = { hair: '✂️', bridal: '💄', skin: '🧖', nails: '💅', shop: '🏠' };
+var galIcons = { hair: '✂️', bridal: '💄', skin: '🧖', nails: '💅', shop: '🏠', beforeafter: '✨' };
 
 function renderGalAdmin() {
   var w = document.getElementById('galMgrGrid');
@@ -835,6 +921,7 @@ document.addEventListener('keydown', function(e) {
     closeOfferModal();
     closeGalModal();
     closeStatusModal();
+    closeStylistModal();
   }
 });
 async function deleteSelectedAppointments() {
@@ -1020,7 +1107,107 @@ window.editStylist = editStylist;
 window.toggleStylist = toggleStylist;
 window.deleteStylist = deleteStylist;
 window.renderStylistAdmin = renderStylistAdmin;
-window.toggleDarkMode = toggleDarkMode;
+window.loadStoreForWorker = loadStoreFromFirebase;
+
+// ════════════════════════════════════════════════════════
+// DATE FILTER
+// ════════════════════════════════════════════════════════
+function clearDateFilter() {
+  var f = document.getElementById('fltDateFrom');
+  var t = document.getElementById('fltDateTo');
+  if (f) f.value = '';
+  if (t) t.value = '';
+  renderAppts();
+}
+window.clearDateFilter = clearDateFilter;
+
+// ════════════════════════════════════════════════════════
+// STYLIST SCHEDULE VIEW
+// ════════════════════════════════════════════════════════
+var scheduleWeekOffset = 0;
+
+function shiftScheduleWeek(dir) {
+  scheduleWeekOffset += dir;
+  renderSchedule();
+}
+
+function renderSchedule() {
+  var wrap = document.getElementById('scheduleGridWrap');
+  var label = document.getElementById('scheduleWeekLabel');
+  if (!wrap) return;
+
+  var today = new Date();
+  var monday = new Date(today);
+  monday.setDate(today.getDate() - today.getDay() + 1 + (scheduleWeekOffset * 7));
+
+  var days = [];
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    days.push(d);
+  }
+
+  var startStr = days[0].toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+  var endStr = days[6].toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  if (label) label.textContent = startStr + ' \u2014 ' + endStr;
+
+  var stylists = (STORE.stylists || []).filter(function(s) { return s.active; });
+  if (!stylists.length) { wrap.innerHTML = '<div class="empty-state">No active stylists. Add stylists first.</div>'; return; }
+
+  var timeSlots = ['8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM','7:00 PM','8:00 PM'];
+  var dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  var html = '<div class="schedule-tabs">';
+  stylists.forEach(function(st, idx) {
+    html += '<button class="schedule-stylist-tab' + (idx === 0 ? ' active' : '') + '" onclick="switchScheduleStylist(' + idx + ',this)">' + st.name + '</button>';
+  });
+  html += '</div>';
+
+  stylists.forEach(function(st, idx) {
+    html += '<div class="schedule-calendar' + (idx === 0 ? ' active' : '') + '" data-stylist-idx="' + idx + '">';
+    html += '<table class="schedule-table"><thead><tr><th style="width:80px;">Time</th>';
+    days.forEach(function(d, di) {
+      var isToday = d.toDateString() === today.toDateString();
+      html += '<th' + (isToday ? ' class="schedule-today"' : '') + '>' + dayNames[di] + '<br><span style="font-size:0.55rem;">' + d.getDate() + '/' + (d.getMonth()+1) + '</span></th>';
+    });
+    html += '</tr></thead><tbody>';
+
+    timeSlots.forEach(function(slot) {
+      html += '<tr>';
+      html += '<td style="font-size:0.68rem;color:var(--taupe);white-space:nowrap;">' + slot + '</td>';
+      days.forEach(function(d) {
+        var dateStr = d.toISOString().split('T')[0];
+        var bookings = STORE.bookings.filter(function(b) {
+          return b.date === dateStr && b.time === slot && b.stylist === st.name && b.status !== 'Cancelled';
+        });
+        if (bookings.length > 1) {
+          html += '<td class="schedule-cell schedule-double"><div class="schedule-booking">' + bookings.map(function(b) { return '<div class="schedule-client">' + b.name.split(' ')[0] + '</div>'; }).join('') + '<div class="schedule-warn">\u26a0\ufe0f Double!</div></div></td>';
+        } else if (bookings.length === 1) {
+          var cls = bookings[0].status === 'Confirmed' ? 'schedule-confirmed' : 'schedule-pending';
+          html += '<td class="schedule-cell ' + cls + '"><div class="schedule-booking"><div class="schedule-client">' + bookings[0].name.split(' ')[0] + '</div></div></td>';
+        } else {
+          html += '<td class="schedule-cell"></td>';
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+  });
+
+  wrap.innerHTML = html;
+}
+
+function switchScheduleStylist(idx, btn) {
+  document.querySelectorAll('.schedule-stylist-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.schedule-calendar').forEach(function(c) { c.classList.remove('active'); });
+  var cal = document.querySelector('.schedule-calendar[data-stylist-idx="' + idx + '"]');
+  if (cal) cal.classList.add('active');
+}
+
+window.renderSchedule = renderSchedule;
+window.shiftScheduleWeek = shiftScheduleWeek;
+window.switchScheduleStylist = switchScheduleStylist;
 
 document.addEventListener('change', function(e){
 

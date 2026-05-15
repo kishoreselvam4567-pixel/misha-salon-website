@@ -1594,29 +1594,232 @@
         }
 
 
+        /* ── PREMIUM WHATSAPP FLOATING BUTTON ── */
         .wa-float {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 24px;
+            right: 24px;
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background: #f3f3f3;
+            background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             text-decoration: none;
             z-index: 999;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-            transition: transform 0.2s;
+            box-shadow: 0 6px 24px rgba(37, 211, 102, 0.35);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         .wa-float:hover {
-            transform: scale(1.1);
+            transform: scale(1.1) translateY(-3px);
+            box-shadow: 0 10px 36px rgba(37, 211, 102, 0.45);
+        }
+        .wa-float-icon {
+            width: 28px;
+            height: 28px;
+            z-index: 2;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15));
+        }
+        .wa-float-pulse {
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: rgba(37, 211, 102, 0.25);
+            animation: waPulse 2s ease-out infinite;
+        }
+        @keyframes waPulse {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .wa-float-label {
+            position: absolute;
+            right: 68px;
+            background: var(--dark);
+            color: #fff;
+            font-size: 0.72rem;
+            letter-spacing: 0.04em;
+            padding: 0.45rem 0.9rem;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(8px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+        }
+        .wa-float-label::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 5px solid transparent;
+            border-left-color: var(--dark);
+        }
+        .wa-float:hover .wa-float-label {
+            opacity: 1;
+            transform: translateX(0);
         }
 
-        .wa-float img {
+        /* ── LIVE STATUS BADGE ── */
+        .live-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.52rem;
+            font-weight: 500;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 0.15rem 0.5rem;
+            border-radius: 99px;
+            margin-left: 0.4rem;
+            vertical-align: middle;
+            animation: fadeIn 0.5s ease;
+        }
+        .live-status-badge.open {
+            background: rgba(37, 180, 80, 0.12);
+            color: #1a8a42;
+            border: 1px solid rgba(37, 180, 80, 0.25);
+        }
+        .live-status-badge.closed {
+            background: rgba(180, 50, 50, 0.1);
+            color: #a33;
+            border: 1px solid rgba(180, 50, 50, 0.2);
+        }
+        .live-status-dot {
+            width: 6px;
+            height: 6px;
             border-radius: 50%;
+            display: inline-block;
+        }
+        .live-status-badge.open .live-status-dot {
+            background: #25b450;
+            box-shadow: 0 0 6px rgba(37, 180, 80, 0.5);
+            animation: statusPulse 1.5s ease-in-out infinite;
+        }
+        .live-status-badge.closed .live-status-dot {
+            background: #a33;
+        }
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* ── TESTIMONIALS ── */
+        .testimonials-section {
+            background: var(--cream);
+            padding: 6rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .testimonials-section::before {
+            content: '\u201C';
+            position: absolute;
+            top: 2rem;
+            right: 5rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18rem;
+            color: rgba(158, 123, 92, 0.05);
+            line-height: 1;
+            pointer-events: none;
+        }
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+        }
+        .testimonial-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            position: relative;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+        .testimonial-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--beige), var(--brown));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+        .testimonial-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(92, 61, 46, 0.1);
+        }
+        .testimonial-card:hover::before {
+            transform: scaleX(1);
+        }
+        .testimonial-stars {
+            color: #E8A838;
+            font-size: 0.9rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+        .testimonial-text {
+            font-size: 0.88rem;
+            line-height: 1.85;
+            color: var(--dark);
+            font-style: italic;
+            margin-bottom: 1.5rem;
+        }
+        .testimonial-author {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .testimonial-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--beige), var(--brown));
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+        .testimonial-name {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: var(--dark);
+        }
+        .testimonial-service {
+            font-size: 0.68rem;
+            color: var(--taupe);
+            letter-spacing: 0.08em;
+            margin-top: 2px;
+        }
+
+        /* ── BOOKING DURATION ROW ── */
+        .bk-duration-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.7rem 0;
+            margin-top: 0.3rem;
+            border-top: 1px dashed var(--border);
+            font-size: 0.78rem;
+            color: var(--taupe);
+        }
+        .bk-duration-row span:last-child {
+            font-weight: 500;
+            color: var(--brown);
         }
 
         /* ── RESPONSIVE ── */
@@ -1689,6 +1892,14 @@
             .offers-grid {
                 grid-template-columns: 1fr;
             }
+
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+            .testimonials-section {
+                padding: 3rem 0;
+            }
+            .wa-float-label { display: none; }
 
             .map-section {
                 padding: 0 1.5rem 3rem;
