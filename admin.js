@@ -1333,3 +1333,4 @@ async function quickUpdateStatus(id, status){
 
 window.quickUpdateStatus =
 quickUpdateStatus;
+window.toggleDarkMode = toggleDarkMode;
